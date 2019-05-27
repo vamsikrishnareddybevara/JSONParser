@@ -11,7 +11,7 @@ const numberParser = input => {
   if( input === '0') return [0,''];
   if(input[0] === '0' && input.length !== 1) return null;
   let secondValue = input.slice(input.match(numRegex)[0].length);
-  return !numRegex.test(input)? null: (secondValue[0] === 'e' || secondValue[0] === 'E')? null: [(parseFloat(input.match(numRegex)[0])), secondValue];
+  return !numRegex.test(input)? null: (secondValue[0] === 'e' || secondValue[0] === 'E' || secondValue[0] === '.')? null: [(parseFloat(input.match(numRegex)[0])), secondValue];
 }
 // String Parser
 const stringparser = input => 
