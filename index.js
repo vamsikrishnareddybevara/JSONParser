@@ -1,4 +1,6 @@
-const nullParser = input => (!input.startWith('null'))? null: [null, input.slice(4)];
+
+const fs = require('fs');
+const nullParser = input => (!input.startsWith("null"))? null: [null, input.slice(4)];
 
 
 const booleanParser = input => (!input.startsWith('true') && !input.startsWith('false'))? null: (input.startsWith('true'))? [true, input.slice(4)]: [false, input.slice(5)];
@@ -6,13 +8,17 @@ const booleanParser = input => (!input.startsWith('true') && !input.startsWith('
 
 let numRegex = /^[-]?[0-9]\d*(\.\d+)?([eE]?[+-]?\d+)?/;
 const numberParser = input => {
-  let secondValue = input.slice(input.match(numRegex)[0].length);
-  if( input === '0') return [0,''];
-  if(input[0] === '0' && input.length !== 1 && ! /\./.test(input)) return null;
-  return !numRegex.test(input)? null: (secondValue[0] === 'e' || secondValue[0] === 'E' || secondValue[0] === '.')? null: [(parseFloat(input.match(numRegex)[0])), secondValue];
+  	if( input === '0') return [0,''];
+  	if(input[0] === '0' && input.length !== 1 && ! /\./.test(input)) return null;
+  	if(!numRegex.test(input)){
+  		return null;
+  	}else {
+  	let secondValue = input.slice(input.match(numRegex)[0].length);
+  	return (secondValue[0] === 'e' || secondValue[0] === 'E' || secondValue[0] === '.')? null: [(parseFloat(input.match(numRegex)[0])), secondValue];
+  }
+  return null;
 }
 
-const fs = require('fs');
 
 let unicodeRegex = /[A-Fa-f0-9]{4}$/;
 let specialCharacters = {
@@ -34,15 +40,24 @@ let escapeCharacters = {
     "\t": true
 }
 
-let stringValue = "";
+
+
 const stringParser = str => {
+	let stringValue = "";		
+	let quoteCount = 0;
 	for(let i = 0; i < str.length; i++) {
+		if(str[0] !== "\"") return null;
+		if(str[i] === "\"") {
+			quoteCount++;
+		}
+
+
 		if(escapeCharacters[str[i]]) return null;
 	    if(str[i] === "\\") {
 	      if( str[i+1] === 'u') {
 	        if(!unicodeRegex.test(str.slice(i+2, i+6))) return null;
 	        else {
-	          stringValue = stringValue + "\\u" + parseInt(str.slice(i+2, i+6),16).toString('utf-8');
+	          stringValue = stringValue + "\\u" + parseInt(str.slice(i+2, i+6));
 	          i = i+5;
 	        }
 	      } else {
@@ -56,29 +71,60 @@ const stringParser = str => {
 	    else {
 	      stringValue += str[i];
 	    }
+	    if (quoteCount === 2) return [stringValue.slice(1,-1), str.slice(stringValue.length)] ;
 	  }
-	return stringValue;
 }
 
-// console.log(stringParser((fs.readFileSync('input.json')).toString('utf-8')));
 
-const arrayValueChecker = value => {
-	let returnedArray;
-	const typeArray = [nullParser, booleanParser, numberParser, stringParser, arrayParser];
+const parseStringValue = value => {
+	// console.log(value[0]);
+	console.log(value);
+	const typeArray = [nullParser, booleanParser, numberParser, arrayParser, stringParser];
+	let returnedValue;
 	for (let type of typeArray) {
-		returnedArray = type(value);
-		if(returnedValue !== null) return value;
+		returnedValue = type(value);
+		
+		if(returnedValue !== null) {
+			console.log(returnedValue);
+			return returnedValue;
+		}
 	}
 	return null;
 }
 
 const arrayParser = string => {
-	if(string[0] !== "[" || string[string.length-1] !== "]" ) return null;
-	let outputArray = [];
-	let subString = string.slice(1, string.length);
-	while(subString.length !== 0) {
-		let returnedArray = arrayValueChecker(subString.trimStart());
-
-
+	if(string[0] !== "[") return null;
+	let newArray = new Array();
+		let subString = string.slice(1, string.length);
+	 while ( subString.length !== 0){
+		let returnedValue = parseStringValue(subString.trimStart());
+		if( returnedValue  === null) {
+			// if(subString.trimStart()[0] === "]") {
+			// 	return [newArray, subString.trimStart().slice(1, subString.trimStart().length)]
+			// }
+			return null;
+		}
+		// console.log(returnedValue[0]);
+		// if(returnedValue[0][1] !== "[") returnedValue[0] = returnedValue[0].slice(1,-1);
+		// console.log(returnedValue[0]);
+		newArray.push(returnedValue[0]);
+		console.log(newArray);
+		if(returnedValue[1].trimStart().startsWith(",")) {
+			subString = returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length);
+			continue;
+			// if(subString === "]" || subString === ",") return null;
+		}
+		if(returnedValue[1].trimStart().startsWith("]")) {
+			return [newArray, returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length)];
+		}
+		return null;
+	}
+	return null;
 }
-console.log(arrayParser((fs.readFileSync('input.json'))));
+
+let result = arrayParser(fs.readFileSync("input.json").toString("utf-8"));
+if(result === null) {
+	console.log(null);
+} else {
+	console.log(result[1].length >= 1? null: arrayParser(fs.readFileSync("input.json").toString("utf-8"))[0]);
+}
