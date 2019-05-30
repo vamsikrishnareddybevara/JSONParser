@@ -1,11 +1,11 @@
-
+// Null Parser
 const fs = require('fs');
 const nullParser = input => (!input.startsWith("null"))? null: [null, input.slice(4)];
 
-
+// Boolean Parser
 const booleanParser = input => (!input.startsWith('true') && !input.startsWith('false'))? null: (input.startsWith('true'))? [true, input.slice(4)]: [false, input.slice(5)];
 
-
+// Number Parser
 let numRegex = /^[-]?[0-9]\d*(\.\d+)?([eE]?[+-]?\d+)?/;
 const numberParser = input => {
   	if( input === '0') return [0,''];
@@ -19,7 +19,7 @@ const numberParser = input => {
   return null;
 }
 
-
+// String Parser
 let unicodeRegex = /[A-Fa-f0-9]{4}$/;
 let specialCharacters = {
         "\"": "\"",
@@ -40,8 +40,6 @@ let escapeCharacters = {
     "\t": true
 }
 
-
-
 const stringParser = str => {
 	let stringValue = "";		
 	let quoteCount = 0;
@@ -50,7 +48,6 @@ const stringParser = str => {
 		if(str[i] === "\"") {
 			quoteCount++;
 		}
-
 
 		if(escapeCharacters[str[i]]) return null;
 	    if(str[i] === "\\") {
@@ -77,8 +74,6 @@ const stringParser = str => {
 
 
 const parseStringValue = value => {
-	// console.log(value[0]);
-	console.log(value);
 	const typeArray = [nullParser, booleanParser, numberParser, arrayParser, stringParser];
 	let returnedValue;
 	for (let type of typeArray) {
@@ -93,38 +88,33 @@ const parseStringValue = value => {
 }
 
 const arrayParser = string => {
+	let count = 0;
 	if(string[0] !== "[") return null;
+	if(string[0] === "[") count++;
+	if(count > 19)  return null;
 	let newArray = new Array();
-		let subString = string.slice(1, string.length);
+	let subString = string.slice(1, string.length);
 	 while ( subString.length !== 0){
 		let returnedValue = parseStringValue(subString.trimStart());
 		if( returnedValue  === null) {
-			// if(subString.trimStart()[0] === "]") {
-			// 	return [newArray, subString.trimStart().slice(1, subString.trimStart().length)]
-			// }
 			return null;
 		}
-		// console.log(returnedValue[0]);
-		// if(returnedValue[0][1] !== "[") returnedValue[0] = returnedValue[0].slice(1,-1);
-		// console.log(returnedValue[0]);
 		newArray.push(returnedValue[0]);
 		console.log(newArray);
 		if(returnedValue[1].trimStart().startsWith(",")) {
 			subString = returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length);
 			continue;
-			// if(subString === "]" || subString === ",") return null;
 		}
 		if(returnedValue[1].trimStart().startsWith("]")) {
 			return [newArray, returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length)];
 		}
 		return null;
 	}
-	return null;
 }
 
 let result = arrayParser(fs.readFileSync("input.json").toString("utf-8"));
 if(result === null) {
 	console.log(null);
 } else {
-	console.log(result[1].length >= 1? null: arrayParser(fs.readFileSync("input.json").toString("utf-8"))[0]);
+	console.log(JSON.stringify(result[1].length >= 1? null: arrayParser(fs.readFileSync("input.json").toString("utf-8"))[0]));
 }
