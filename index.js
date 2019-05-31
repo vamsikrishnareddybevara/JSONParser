@@ -80,18 +80,16 @@ const parseStringValue = value => {
 		returnedValue = type(value);
 		
 		if(returnedValue !== null) {
-			console.log(returnedValue);
+			// console.log(returnedValue);
 			return returnedValue;
 		}
 	}
 	return null;
 }
-
+let count = 0;
 const arrayParser = string => {
-	let count = 0;
 	if(string[0] !== "[") return null;
 	if(string[0] === "[") count++;
-	if(count > 19)  return null;
 	let newArray = new Array();
 	let subString = string.slice(1, string.length);
 	 while ( subString.length !== 0){
@@ -100,7 +98,7 @@ const arrayParser = string => {
 			return null;
 		}
 		newArray.push(returnedValue[0]);
-		console.log(newArray);
+		// console.log(newArray);
 		if(returnedValue[1].trimStart().startsWith(",")) {
 			subString = returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length);
 			continue;
@@ -113,8 +111,27 @@ const arrayParser = string => {
 }
 
 let result = arrayParser(fs.readFileSync("input.json").toString("utf-8"));
-if(result === null) {
+if(result === null  || count > 19 ) {
 	console.log(null);
 } else {
 	console.log(JSON.stringify(result[1].length >= 1? null: arrayParser(fs.readFileSync("input.json").toString("utf-8"))[0]));
+}
+
+const parseJsonObject = value => {
+	let key = stringParser(value);
+	if(key === null) return null;
+	let subString = key[1].trimStart()
+	if(! subString.startsWith(":")) return null;
+	subString = subString.slice(1, subString.length);
+	let value = parseJsonArray(subString.trimStart());
+	if( value === null) return null;
+	return [[key, value[0]], value[1]]; 
+
+}
+const objectParser = string => {
+	if(string[0] !== "{") return null;
+	let subString = subString.slice(1, string.length);
+	while( subString.length !== 0) {
+		let returnedValue =  
+	}
 }
