@@ -81,10 +81,11 @@ const arrayParser = string => {
 			return null
 		}
 		newArray.push(returnedValue[0]);
-		// console.log(newArray);
+
+
+
 		if(returnedValue[1].trimStart().startsWith(",")) {
 			subString = returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length);
-			// console.log(subString)
 			continue;
 		}
 		if(returnedValue[1].trimStart().startsWith("]")) {
@@ -92,16 +93,13 @@ const arrayParser = string => {
 		}
 		return null;
 	}
-	// return null;
 }
-
 
 
 const objectParser = string => {
 	if(string[0] !== "{") return null;
 	let newObject = new Object();
 	let subString = string.slice(1, string.length);
-	// console.log(subString);
 	while( subString.length !== 0) {
 		let returnedValue =  parseJsonObject(subString.trimStart());
 		if(returnedValue === null) {
@@ -111,7 +109,6 @@ const objectParser = string => {
 			return null;
 		} 
 		newObject[returnedValue[0][0]] = returnedValue[0][1];
-		// console.log(newObject);
 		if(returnedValue[1].trimStart().startsWith(",")) {
 			subString = returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length);
 			continue;
@@ -126,26 +123,21 @@ const objectParser = string => {
 
 const parseJsonObject = input => {
 	let key = stringParser(input);
-	// console.log(key);
 	if(key === null) return null;
 	let subString = key[1].trimStart();
 	if(! subString.startsWith(":")) return null;
 	subString = subString.slice(1, subString.length);
-	// console.log(subString)
 	let value = parseJsonArray(subString.trimStart());
-	// console.log(value);
 	if( value === null) return null;
 	return [[key[0], value[0]], value[1]]; 
 
 }
 const parseJsonArray = value => {
-	// console.log(value)
 	const typeArray = [nullParser, booleanParser, numberParser,  arrayParser, stringParser,objectParser ];
 	let returnedValue;
 	for (let type of typeArray) {
 		returnedValue = type(value);
 		if(returnedValue !== null) {
-			// console.log(returnedValue);
 			return returnedValue;
 		}
 	}
@@ -156,7 +148,6 @@ const parseJsonArray = value => {
 let json = fs.readFileSync("input.json").toString("utf-8");
 if(json.startsWith("{")) {
 	let objectResult = objectParser(json);
-	// console.log(objectResult, "cool")
 	if(objectResult === null) console.log(null);
 	else console.log(JSON.stringify(objectResult[1].length >= 1? null: objectResult[0]));
 } else if( json.startsWith("[")) {
@@ -165,13 +156,3 @@ if(json.startsWith("{")) {
 		console.log(null);
 	} else console.log(JSON.stringify(arrayResult[1].length >= 1? null: arrayResult[0]));
 } else console.log(null);
-
-// function callAllParsers(value) {
-// 	for(let type of typeArray) {
-// 		let result = type(value);
-// 		if(result !== null) return result;
-// 	}
-// 	return null;
-// }
-// console.log(JSON.stringify(callAllParsers(fs.readFileSync("input.json").toString("utf-8"))));
-
