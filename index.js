@@ -37,7 +37,6 @@ let escapeCharacters = {
     "\t": true
 }
 
-
 const stringParser = str => {
 	let stringValue = "";
 	let quoteCount = 0;
@@ -60,17 +59,16 @@ const stringParser = str => {
 	    else {
 	      stringValue += str[i];
 	    }
-	    if(quoteCount === 2) 	{
-	   	return [stringValue.slice(1,-1), str.slice(i+1)];
-	    }
-
+	    if(quoteCount === 2)  return [stringValue.slice(1,-1), str.slice(i+1)];
 	}
 	return null;
 }
 
 
 const arrayParser = string => {
+	// console.log("string")
 	if(string[0] !== "[") return null;
+
 	let newArray = new Array();
 	// console.log(newArray);
 	let subString = string.slice(1, string.length);
@@ -130,9 +128,10 @@ const parseJsonObject = input => {
 	let key = stringParser(input);
 	// console.log(key);
 	if(key === null) return null;
-	let subString = key[1].trimStart()
+	let subString = key[1].trimStart();
 	if(! subString.startsWith(":")) return null;
 	subString = subString.slice(1, subString.length);
+	// console.log(subString)
 	let value = parseJsonArray(subString.trimStart());
 	// console.log(value);
 	if( value === null) return null;
@@ -141,10 +140,10 @@ const parseJsonObject = input => {
 }
 const parseJsonArray = value => {
 	// console.log(value)
-	const typeArray = [nullParser, booleanParser, numberParser, stringParser, arrayParser,objectParser ];
+	const typeArray = [nullParser, booleanParser, numberParser,  arrayParser, stringParser,objectParser ];
 	let returnedValue;
 	for (let type of typeArray) {
-		returnedValue = type(value);	
+		returnedValue = type(value);
 		if(returnedValue !== null) {
 			// console.log(returnedValue);
 			return returnedValue;
@@ -157,6 +156,7 @@ const parseJsonArray = value => {
 let json = fs.readFileSync("input.json").toString("utf-8");
 if(json.startsWith("{")) {
 	let objectResult = objectParser(json);
+	// console.log(objectResult, "cool")
 	if(objectResult === null) console.log(null);
 	else console.log(JSON.stringify(objectResult[1].length >= 1? null: objectResult[0]));
 } else if( json.startsWith("[")) {
