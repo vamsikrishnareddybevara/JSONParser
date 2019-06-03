@@ -62,16 +62,13 @@ const objectParser = string => {
 	let subString = string.slice(1, string.length);
 	while( subString.length !== 0) {
 		let returnedValue =  parseJsonObject(subString.trimStart());
-		if(returnedValue === null) {
-			return ((subString.trimStart()[0] === "}")? [newObject, subString.trimStart().slice(1, subString.trimStart().length)]: null);
-		} 
+		if(returnedValue === null) return ((subString.trimStart()[0] === "}")? [newObject, subString.trimStart().slice(1, subString.trimStart().length)]: null);
 		newObject[returnedValue[0][0]] = returnedValue[0][1];
 		if(returnedValue[1].trimStart().startsWith(",")) {
 			subString = returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length);
 			continue;
 		}
-		if(returnedValue[1].trimStart().startsWith("}")) return [newObject, returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length)];
-		return null;
+		return ((returnedValue[1].trimStart().startsWith("}"))? [newObject, returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length)]: null);
 	}
 }
 
