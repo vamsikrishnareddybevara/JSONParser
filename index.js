@@ -1,7 +1,11 @@
+
 const fs = require('fs');
+//number parser
 const nullParser = input => (!input.startsWith("null"))? null: [null, input.slice(4)];
+//boolean parser
 const booleanParser = input => (!input.startsWith('true') && !input.startsWith('false'))? null: (input.startsWith('true'))? [true, input.slice(4)]: [false, input.slice(5)];
 
+// number parser
 let numRegex = /^[-]?[0-9]\d*(\.\d+)?([eE]?[+-]?\d+)?/;
 const numberParser = input => {
 	  if(!numRegex.test(input)) return null;
@@ -11,7 +15,7 @@ const numberParser = input => {
 	  	  return (secondValue[0] === 'e' || secondValue[0] === 'E' || secondValue[0] === '.')? null: [(parseFloat(input.match(numRegex)[0])), secondValue];
 	  }
 }
-
+// string  parser
 let unicodeRegex = /[A-Fa-f0-9]{4}$/;
 let specialCharacters = {"\"": "\"", "\\": "\\", "/": "/", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t"};
 let escapeCharacters = {"\b": true, "\f": true, "\n": true, "\r": true, "\t": true}
@@ -39,6 +43,7 @@ const stringParser = str => {
 	return null;
 }
 
+// array parser
 const arrayParser = string => {
 	if(string[0] !== "[") return null;
 	let newArray = new Array();
@@ -56,6 +61,7 @@ const arrayParser = string => {
 	}
 }
 
+// object parser
 const objectParser = string => {
 	if(string[0] !== "{") return null;
 	let newObject = new Object();
@@ -71,7 +77,7 @@ const objectParser = string => {
 		return ((returnedValue[1].trimStart().startsWith("}"))? [newObject, returnedValue[1].trimStart().slice(1, returnedValue[1].trimStart().length)]: null);
 	}
 }
-
+// parse json object
 const parseJsonObject = input => {
 	let key = stringParser(input);
 	if(key === null) return null;
